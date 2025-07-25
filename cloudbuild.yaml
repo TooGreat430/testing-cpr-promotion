@@ -11,19 +11,19 @@ steps:
       TARGET_REPO=asia-southeast2-docker.pkg.dev/me-data-internal-sandbox/custom-prediction-routine-sdk
 
       # Ambil semua image + tag dari source repo
-      IMAGES=$(gcloud artifacts docker images list $SOURCE_REPO --format="value(NAME)")
+      IMAGES=$$(gcloud artifacts docker images list $$SOURCE_REPO --format="value(NAME)")
 
-      for IMAGE in $IMAGES; do
-        TAGS=$(gcloud artifacts docker tags list $IMAGE --format="value(TAG)")
-        for TAG in $TAGS; do
-          FULL_IMAGE_SRC="${IMAGE}:${TAG}"
-          IMAGE_NAME=$(basename $IMAGE)
-          FULL_IMAGE_DEST="${TARGET_REPO}/${IMAGE_NAME}:${TAG}"
+      for IMAGE in $$IMAGES; do
+        TAGS=$$(gcloud artifacts docker tags list $$IMAGE --format="value(TAG)")
+        for TAG in $$TAGS; do
+          FULL_IMAGE_SRC="$$IMAGE:$$TAG"
+          IMAGE_NAME=$$(basename $$IMAGE)
+          FULL_IMAGE_DEST="$$TARGET_REPO/$$IMAGE_NAME:$$TAG"
 
-          echo "Processing $FULL_IMAGE_SRC -> $FULL_IMAGE_DEST"
+          echo "Processing $$FULL_IMAGE_SRC -> $$FULL_IMAGE_DEST"
 
-          docker pull $FULL_IMAGE_SRC
-          docker tag $FULL_IMAGE_SRC $FULL_IMAGE_DEST
-          docker push $FULL_IMAGE_DEST
+          docker pull $$FULL_IMAGE_SRC
+          docker tag $$FULL_IMAGE_SRC $$FULL_IMAGE_DEST
+          docker push $$FULL_IMAGE_DEST
         done
       done
