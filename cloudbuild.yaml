@@ -2,12 +2,28 @@ options:
   logging: CLOUD_LOGGING_ONLY
 
 steps:
-- name: 'gcr.io/cloud-builders/docker'
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'  # karena butuh gcloud CLI
   entrypoint: 'bash'
   args:
     - '-c'
     - |
-      docker pull asia-southeast2-docker.pkg.dev/bdi-onprem/custom-prediction-routine-sdk/output-cpr:latest
-      docker tag asia-southeast2-docker.pkg.dev/bdi-onprem/custom-prediction-routine-sdk/output-cpr:latest \
-                 asia-southeast2-docker.pkg.dev/me-data-internal-sandbox/custom-prediction-routine-sdk/output-cpr:latest
-      docker push asia-southeast2-docker.pkg.dev/me-data-internal-sandbox/custom-prediction-routine-sdk/output-cpr:latest
+      SOURCE_REPO=asia-southeast2-docker.pkg.dev/bdi-onprem/custom-prediction-routine-sdk
+      TARGET_REPO=asia-southeast2-docker.pkg.dev/me-data-internal-sandbox/custom-prediction-routine-sdk
+
+      # Ambil semua image + tag dari source repo
+      IMAGES=$(gcloud artifacts docker images list $SOURCE_REPO --format="value(NAME)")
+
+      for IMAGE in $IMAGES; do
+        TAGS=$(gcloud artifacts docker tags list $IMAGE --format="value(TAG)")
+        for TAG in $TAGS; do
+          FULL_IMAGE_SRC="${IMAGE}:${TAG}"
+          IMAGE_NAME=$(basename $IMAGE)
+          FULL_IMAGE_DEST="${TARGET_REPO}/${IMAGE_NAME}:${TAG}"
+
+          echo "Processing $FULL_IMAGE_SRC -> $FULL_IMAGE_DEST"
+
+          docker pull $FULL_IMAGE_SRC
+          docker tag $FULL_IMAGE_SRC $FULL_IMAGE_DEST
+          docker push $FULL_IMAGE_DEST
+        done
+      done
