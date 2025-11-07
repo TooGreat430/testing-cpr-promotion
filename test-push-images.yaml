@@ -1,17 +1,6 @@
-options:
-  logging: CLOUD_LOGGING_ONLY
-
-substitutions:
-  # IMPORTANT: Custom substitutions MUST start with an underscore (_).
-  # If you pass a substitution named 'IMAGE_NAME' when triggering the build,
-  # it will fail because it doesn't start with '_', and it's not a built-in variable.
-  _PROJECT_SOURCE: bdi-onprem # Default value for the source project ID
-  _PROJECT_TARGET: me-data-internal-sandbox # Default value for the target project ID
-  
-
 steps:
-  # Step 1: Copy docker images from Artifact Registry source to target
-  - id: copy-docker-images-source-project
+  # Step 1: Copy docker image dari Artifact Registry source ke target
+  - id: copy-docker-image-source-project
     name: gcr.io/cloud-builders/docker
     entrypoint: bash
     args:
@@ -19,47 +8,13 @@ steps:
       - |
         set -e
 
-        # --- Configuration Variables ---
-        REPO_NAME_SOURCE="custom-prediction-routine-sdk"
-        REPO_NAME_TARGET="custom-prediction-routine-sdk"
+        PIPELINE_SRC_IMAGE="asia-southeast2-docker.pkg.dev/bdi-onprem/custom-prediction-routine-sdk/image_docker_1:latest"
+        PIPELINE_DEST_IMAGE="asia-southeast2-docker.pkg.dev/$_PROJECT_TARGET/$$REPO_NAME_TARGET/image_docker_1:latest"     
         
-        # Array of image names to copy
-        IMAGE_NAMES=(
-          "image_docker_1"
-          "image_docker_2"
-          "image_docker_3"
-        )
-        
-        # --- Loop and Copy Images ---
-        
-        for IMAGE_NAME in "${IMAGE_NAMES[@]}"; do
-            echo "---"
-            echo "[STEP] Processing image: ${IMAGE_NAME}"
-            
-            # Construct Source and Destination Image URIs using the Cloud Build substitutions.
-            # Notice the use of $_PROJECT_SOURCE and $_PROJECT_TARGET
-            SRC_IMAGE="asia-southeast2-docker.pkg.dev/bdi-onprem/${REPO_NAME_SOURCE}/${IMAGE_NAME}:latest"
-            DEST_IMAGE="asia-southeast2-docker.pkg.dev/me-data-internal-sandbox/${REPO_NAME_TARGET}/${IMAGE_NAME}:latest"
-
-            echo "[INFO] Source image : ${SRC_IMAGE}"
-            echo "[INFO] Dest image   : ${DEST_IMAGE}"
-            
-            # 1. Pull the image from the source project
-            echo "[ACTION] Pulling image..."
-            docker pull "${SRC_IMAGE}"
-            
-            # 2. Tag the image for the target project
-            echo "[ACTION] Tagging image..."
-            docker tag "${SRC_IMAGE}" "${DEST_IMAGE}"
-            
-            # 3. Push the tagged image to the target project
-            echo "[ACTION] Pushing image..."
-            docker push "${DEST_IMAGE}"
-            
-            echo "[SUCCESS] Image '${IMAGE_NAME}' successfully copied to target project 🎉"
-        done
-
-        echo "---"
-        echo "[SUMMARY] All specified images have been processed."
-        echo "----------------------------------------"
-
+        docker pull "$$PIPELINE_SRC_IMAGE"
+        docker tag "$$PIPELINE_SRC_IMAGE" "$$PIPELINE_DEST_IMAGE"
+        docker push "$$PIPELINE_DEST_IMAGE"
+options:
+  logging: CLOUD_LOGGING_ONLY
+  pool:
+    name: projects/$PROJECT_ID/locations/asia-southeast2/workerPools/private-pool-dev
