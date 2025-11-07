@@ -2,8 +2,7 @@ options:
   logging: CLOUD_LOGGING_ONLY
 
 substitutions:
-  # The 'IMAGE_NAME: prj' caused the error because custom substitutions
-  # must start with an underscore (e.g., '_IMAGE_NAME').
+  _IMAGE_NAME: test
   # Since you don't use this substitution in the script, it's safer to remove it.
   # If you want to use project IDs as substitutions, use the existing
   # _PROJECT_TARGET and _PROJECT_SOURCE pattern.
@@ -69,3 +68,4 @@ steps:
         echo "---"
         echo "[SUMMARY] All specified images have been processed."
         echo "----------------------------------------"
+
