@@ -1,3 +1,6 @@
+options:
+  logging: CLOUD_LOGGING_ONLY
+
 steps:
   # Step 1: Copy docker images from Artifact Registry source to target
   - id: copy-docker-images-source-project
@@ -50,4 +53,5 @@ steps:
 
         echo "---"
         echo "[SUMMARY] All specified images have been processed."
+
         echo "----------------------------------------"
