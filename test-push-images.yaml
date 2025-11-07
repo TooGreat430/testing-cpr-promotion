@@ -2,7 +2,11 @@ options:
   logging: CLOUD_LOGGING_ONLY
 
 substitutions:
-IMAGE_NAME: prj
+  # The 'IMAGE_NAME: prj' caused the error because custom substitutions
+  # must start with an underscore (e.g., '_IMAGE_NAME').
+  # Since you don't use this substitution in the script, it's safer to remove it.
+  # If you want to use project IDs as substitutions, use the existing
+  # _PROJECT_TARGET and _PROJECT_SOURCE pattern.
 
 steps:
   # Step 1: Copy docker images from Artifact Registry source to target
@@ -18,13 +22,20 @@ steps:
         REPO_NAME_SOURCE="custom-prediction-routine-sdk"
         REPO_NAME_TARGET="custom-prediction-routine-sdk"
         
-        # Array of image names to copy (assuming these all have the 'image_' prefix conceptually)
-        # Add all your desired image names here.
+        # Array of image names to copy
         IMAGE_NAMES=(
           "image_docker_1"
           "image_docker_2"
           "image_docker_3"
         )
+        
+        # Define Project IDs based on your actual source/target structure
+        # NOTE: I am hardcoding the project IDs here as they were not provided
+        # in the substitutions block. If you want to use substitutions,
+        # you need to define them in the substitutions block and reference them 
+        # using '$_VARIABLE_NAME'.
+        PROJECT_SOURCE="bdi-onprem"
+        PROJECT_TARGET="me-data-internal-sandbox"
         
         # --- Loop and Copy Images ---
         
@@ -33,8 +44,9 @@ steps:
             echo "[STEP] Processing image: ${IMAGE_NAME}"
             
             # Construct Source and Destination Image URIs
-            SRC_IMAGE="asia-southeast2-docker.pkg.dev/bdi-onprem/${REPO_NAME_SOURCE}/${IMAGE_NAME}:latest"
-            DEST_IMAGE="asia-southeast2-docker.pkg.dev/me-data-internal-sandbox/${REPO_NAME_TARGET}/${IMAGE_NAME}:latest"
+            # Note: Using the PROJECT_SOURCE/TARGET variables defined above
+            SRC_IMAGE="asia-southeast2-docker.pkg.dev/${PROJECT_SOURCE}/${REPO_NAME_SOURCE}/${IMAGE_NAME}:latest"
+            DEST_IMAGE="asia-southeast2-docker.pkg.dev/${PROJECT_TARGET}/${REPO_NAME_TARGET}/${IMAGE_NAME}:latest"
 
             echo "[INFO] Source image : ${SRC_IMAGE}"
             echo "[INFO] Dest image   : ${DEST_IMAGE}"
@@ -56,6 +68,4 @@ steps:
 
         echo "---"
         echo "[SUMMARY] All specified images have been processed."
-
         echo "----------------------------------------"
-
