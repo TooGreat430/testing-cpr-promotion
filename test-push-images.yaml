@@ -16,5 +16,4 @@ steps:
         docker push "$$PIPELINE_DEST_IMAGE"
 options:
   logging: CLOUD_LOGGING_ONLY
-  pool:
-    name: projects/$PROJECT_ID/locations/asia-southeast2/workerPools/private-pool-dev
+
