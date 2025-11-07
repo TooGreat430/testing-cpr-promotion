@@ -9,13 +9,14 @@ steps:
         set -e
 
         PIPELINE_SRC_IMAGE="asia-southeast2-docker.pkg.dev/bdi-onprem/custom-prediction-routine-sdk/image_docker_1:latest"
-        PIPELINE_DEST_IMAGE="asia-southeast2-docker.pkg.dev/me-data-internal-sandbox/custom-prediction-routine-sdk/"     
+        PIPELINE_DEST_IMAGE="asia-southeast2-docker.pkg.dev/me-data-internal-sandbox/custom-prediction-routine-sdk/test:latest"     
         
         docker pull "$$PIPELINE_SRC_IMAGE"
         docker tag "$$PIPELINE_SRC_IMAGE" "$$PIPELINE_DEST_IMAGE"
         docker push "$$PIPELINE_DEST_IMAGE"
 options:
   logging: CLOUD_LOGGING_ONLY
+
 
 
 
