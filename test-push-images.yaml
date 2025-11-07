@@ -7,6 +7,7 @@ substitutions:
   # it will fail because it doesn't start with '_', and it's not a built-in variable.
   _PROJECT_SOURCE: bdi-onprem # Default value for the source project ID
   _PROJECT_TARGET: me-data-internal-sandbox # Default value for the target project ID
+  
 
 steps:
   # Step 1: Copy docker images from Artifact Registry source to target
@@ -37,8 +38,8 @@ steps:
             
             # Construct Source and Destination Image URIs using the Cloud Build substitutions.
             # Notice the use of $_PROJECT_SOURCE and $_PROJECT_TARGET
-            SRC_IMAGE="asia-southeast2-docker.pkg.dev/$_PROJECT_SOURCE/${REPO_NAME_SOURCE}/${IMAGE_NAME}:latest"
-            DEST_IMAGE="asia-southeast2-docker.pkg.dev/$_PROJECT_TARGET/${REPO_NAME_TARGET}/${IMAGE_NAME}:latest"
+            SRC_IMAGE="asia-southeast2-docker.pkg.dev/bdi-onprem/${REPO_NAME_SOURCE}/${IMAGE_NAME}:latest"
+            DEST_IMAGE="asia-southeast2-docker.pkg.dev/me-data-internal-sandbox/${REPO_NAME_TARGET}/${IMAGE_NAME}:latest"
 
             echo "[INFO] Source image : ${SRC_IMAGE}"
             echo "[INFO] Dest image   : ${DEST_IMAGE}"
@@ -61,3 +62,4 @@ steps:
         echo "---"
         echo "[SUMMARY] All specified images have been processed."
         echo "----------------------------------------"
+
