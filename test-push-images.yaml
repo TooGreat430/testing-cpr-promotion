@@ -1,0 +1,53 @@
+steps:
+  # Step 1: Copy docker images from Artifact Registry source to target
+  - id: copy-docker-images-source-project
+    name: gcr.io/cloud-builders/docker
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -e
+
+        # --- Configuration Variables ---
+        REPO_NAME_SOURCE="custom-prediction-routine-sdk"
+        REPO_NAME_TARGET="custom-prediction-routine-sdk"
+        
+        # Array of image names to copy (assuming these all have the 'image_' prefix conceptually)
+        # Add all your desired image names here.
+        IMAGE_NAMES=(
+          "image_docker_1"
+          "image_docker_2"
+          "image_docker_3"
+        )
+        
+        # --- Loop and Copy Images ---
+        
+        for IMAGE_NAME in "${IMAGE_NAMES[@]}"; do
+            echo "---"
+            echo "[STEP] Processing image: ${IMAGE_NAME}"
+            
+            # Construct Source and Destination Image URIs
+            SRC_IMAGE="asia-southeast2-docker.pkg.dev/bdi-onprem/${REPO_NAME_SOURCE}/${IMAGE_NAME}:latest"
+            DEST_IMAGE="asia-southeast2-docker.pkg.dev/me-data-internal-sandbox/${REPO_NAME_TARGET}/${IMAGE_NAME}:latest"
+
+            echo "[INFO] Source image : ${SRC_IMAGE}"
+            echo "[INFO] Dest image   : ${DEST_IMAGE}"
+            
+            # 1. Pull the image from the source project
+            echo "[ACTION] Pulling image..."
+            docker pull "${SRC_IMAGE}"
+            
+            # 2. Tag the image for the target project
+            echo "[ACTION] Tagging image..."
+            docker tag "${SRC_IMAGE}" "${DEST_IMAGE}"
+            
+            # 3. Push the tagged image to the target project
+            echo "[ACTION] Pushing image..."
+            docker push "${DEST_IMAGE}"
+            
+            echo "[SUCCESS] Image '${IMAGE_NAME}' successfully copied to target project 🎉"
+        done
+
+        echo "---"
+        echo "[SUMMARY] All specified images have been processed."
+        echo "----------------------------------------"
