@@ -2,8 +2,9 @@ options:
   logging: CLOUD_LOGGING_ONLY
 
 substitutions:
-  # Custom substitutions must start with an underscore (_).
-  # You can override these defaults when triggering the build.
+  # IMPORTANT: Custom substitutions MUST start with an underscore (_).
+  # If you pass a substitution named 'IMAGE_NAME' when triggering the build,
+  # it will fail because it doesn't start with '_', and it's not a built-in variable.
   _PROJECT_SOURCE: bdi-onprem # Default value for the source project ID
   _PROJECT_TARGET: me-data-internal-sandbox # Default value for the target project ID
 
