@@ -16,8 +16,6 @@ for model in models:
         parent_model = model
         break
 
-# --- Step 5: Upload model ke target project ---
-# Note: Schema file (prediction_schema.yaml & instance.yaml) HARUS ada di folder model di source project untuk di push ke model registry target project
 uploaded_model = aiplatform.Model.upload(
     project="me-data-internal-sandbox",
     display_name=model_display_name,
@@ -31,3 +29,4 @@ uploaded_model = aiplatform.Model.upload(
     sync=True
 
 ) 
+
