@@ -1,26 +1,50 @@
 steps:
-# Step 1: Upload model to Vertex AI (Requires Python with aiplatform library)
-- id: upload-model-to-vertex-ai
+# 1. Dedicated Step for installing Python dependencies
+- id: "Install Dependencies"
+  # Use the official Python image
   name: 'python:3.9'
+  # Set the entrypoint to 'pip' to cleanly run pip commands
+  entrypoint: pip
+  args:
+    - install
+    # Use the --user flag to avoid system-level permissions issues
+    - --user 
+    - google-cloud-aiplatform
+    # It's good practice to install the latest google-cloud-storage as well 
+    # since you're interacting with GCS (artifact_uri)
+    - google-cloud-storage
+
+---
+
+# 2. Dedicated Step for Python Execution (Vertex AI Operations)
+- id: "Upload Model to Vertex AI"
+  # Use the same Python image
+  name: 'python:3.9'
+  # Set the entrypoint to 'python3'
   entrypoint: python3
   args:
     - -c
     - |
-      # Install required library for Vertex AI operations
-      pip install google-cloud-aiplatform
+      # When using the --user flag in the previous step,
+      # you need to ensure the system path includes the user's site-packages directory.
+      # This is often necessary in Debian-based containers like the official Python image.
+      import site
+      import sys
+      # Add the user site-packages directory to the path if it's not already there
+      sys.path.append(site.USER_BASE + '/lib/python' + sys.version[:3] + '/site-packages')
       
       from google.cloud import aiplatform
 
       # Define variables
       PROJECT_ID = "me-data-internal-sandbox"
       MODEL_DISPLAY_NAME = "customer-churn"
-      # IMPORTANT: Use the actual PUSHED image URI from Step 1
       PIPELINE_DEST_IMAGE = "asia-southeast2-docker.pkg.dev/me-data-internal-sandbox/custom-prediction-routine-sdk/test:latest"
-
+      
       # Initialize AI Platform
       aiplatform.init(project=PROJECT_ID, location="asia-southeast2")
       
       # 1. Find the parent model for versioning
+      # (Existing logic...)
       models = aiplatform.Model.list(
           project=PROJECT_ID,
           order_by="update_time desc",
@@ -33,17 +57,13 @@ steps:
           project=PROJECT_ID,
           display_name=MODEL_DISPLAY_NAME,
           serving_container_image_uri=PIPELINE_DEST_IMAGE,
-          # Need to specify artifact_uri even if not used for prediction server
           artifact_uri='gs://abc-bkt', # Must be a GCS path
           parent_model=parent_model.resource_name if parent_model else None,
           is_default_version=True,
           labels={
-              "version": "cloud-build-latest" # Placeholder, source_model_version is undefined
+              "version": "cloud-build-latest"
           },
           sync=True
       )
 options:
-
   logging: CLOUD_LOGGING_ONLY
-
-
