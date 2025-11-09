@@ -92,3 +92,8 @@ steps:
     done < /workspace/images_to_copy.txt
   env:
   - 'HOME=/root'
+
+options:
+  # This setting addresses the error by explicitly telling Cloud Build to use 
+  # Cloud Logging for log storage, which is required when using a custom service account.
+  logging: CLOUD_LOGGING_ONLY
