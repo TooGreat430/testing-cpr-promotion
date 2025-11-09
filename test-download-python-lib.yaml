@@ -25,7 +25,6 @@ steps:
       - -c
       - |
         set -e
-        source /workspace/env_subs
         
         root_dir="dist"
         
@@ -41,3 +40,4 @@ steps:
 
 options:
   logging: CLOUD_LOGGING_ONLY
+
