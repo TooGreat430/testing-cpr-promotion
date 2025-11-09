@@ -9,13 +9,37 @@ steps:
         set -e
 
         PIPELINE_SRC_IMAGE="asia-docker.pkg.dev/vertex-ai/automl-tabular/prediction-server:20250218_0625"
-        PIPELINE_DEST_IMAGE="asia-southeast2-docker.pkg.dev/me-data-internal-sandbox/custom-prediction-routine-sdk/prediction:task"     
+        PIPELINE_DEST_IMAGE="asia-southeast2-docker.pkg.dev/me-data-internal-sandbox/custom-prediction-routine-sdk/test:latest"     
         
         docker pull "$$PIPELINE_SRC_IMAGE"
         docker tag "$$PIPELINE_SRC_IMAGE" "$$PIPELINE_DEST_IMAGE"
         docker push "$$PIPELINE_DEST_IMAGE"
+
+        models = aiplatform.Model.list(
+        project="me-data-internal-sandbox", 
+        order_by="update_time desc"
+        )
+        parent_model = None
+        model_display_name="customer-churn"
+        for model in models:
+        if model.display_name.lower() == model_display_name.lower():
+        parent_model = model
+        break
+        
+        uploaded_model = aiplatform.Model.upload(
+        project="me-data-internal-sandbox",
+        display_name="customer-churn",
+        serving_container_image_uri="$$PIPELINE_DEST_IMAGE",
+        parent_model=parent_model.resource_name if parent_model else None,
+        is_default_version=True,
+        labels={
+        "version": source_model_version
+        },
+        sync=True
+        ) 
 options:
   logging: CLOUD_LOGGING_ONLY
+
 
 
 
