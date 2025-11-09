@@ -66,4 +66,5 @@ steps:
           sync=True
       )
 options:
-  logging: CLOUD_LOGGING_ONLY
+  logging: NONE
+
