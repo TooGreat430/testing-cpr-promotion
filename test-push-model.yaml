@@ -1,16 +1,17 @@
 steps:
 # Step: Run Python Script using Bash
 - id: "run-python-command"
-  # Using the python:3.9 builder
-  name: 'python:3.9'
-  # Explicitly use bash to run multiple shell commands
+  name: 'python'
+  entrypoint: pip
+  args:['install', 'google-cloud-aiplatform', 'google-cloud-storage']
+  
+- id: "run-python-command"
+  name: 'python'
   entrypoint: bash
   args:
     - -c
-    # The commands following the '|' must be indented
     - |
       set -e
       python ./test-upload-model.py
 options:
   logging: CLOUD_LOGGING_ONLY
-
