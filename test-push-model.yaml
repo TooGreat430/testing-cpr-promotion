@@ -7,11 +7,9 @@ steps:
   args:
     - '-c'
     - |
-      # Install dependencies
-      pip install google-cloud-aiplatform google-cloud-storage
-
-      # Run the Python script
+      pip install -r requirements.txt
       python ./test-upload-model.py
 
 options:
   logging: CLOUD_LOGGING_ONLY
+
