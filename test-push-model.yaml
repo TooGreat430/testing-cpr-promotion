@@ -3,9 +3,12 @@ steps:
 # We set entrypoint to 'python' explicitly, so the first argument in 'args'
 # is treated as the script name.
 - id: "run-python-command"
-  name: 'python:3.9'
+  name: 'bash'
   entrypoint: python
   args:
-    - './upload-model.py' # The script path relative to the root of the source code.
+    - -c
+    - |
+    set -e
+    python ./test-upload-model.py
 options:
   logging: NONE
