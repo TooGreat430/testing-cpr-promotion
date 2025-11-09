@@ -1,13 +1,17 @@
 steps:
-# Step 1: Install dependencies
-- name: 'python:3.10' # or another suitable Python image
-  entrypoint: 'pip'
-  args: ['install', '-r', 'requirements.txt']
+# Step 1: Install dependencies and run the script in one continuous operation
+- id: "install-and-run-script"
+  # Use a standard Python 3 image
+  name: 'python:3-slim'
+  entrypoint: '/bin/bash'
+  args:
+    - '-c'
+    - |
+      # Install dependencies
+      pip install google-cloud-aiplatform google-cloud-storage
 
-# Step 2: Run your Python script
-- name: 'python:3.10'
-  entrypoint: 'python'
-  args: ./test-upload-model.py
-  
-  options:
+      # Run the Python script
+      python ./test-upload-model.py
+
+options:
   logging: CLOUD_LOGGING_ONLY
