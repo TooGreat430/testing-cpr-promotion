@@ -1,0 +1,43 @@
+steps:
+  # Step 1: Download Python Libraries
+  - id: download-py-libs-from-internet
+    name: python:3.10
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -e
+        
+        root_dir="dist"
+        mkdir -p "$root_dir"
+
+        while IFS= read -r library_name || [ -n "$library_name" ]; do
+          [ -z "$library_name" ] && continue
+          echo "Downloading $library_name..."
+          pip download "$library_name" -d "$root_dir"
+        done < list_library.txt
+
+  # Step 2: Upload Python Libraries to Artifact Registry
+  - id: upload-py-libs
+    name: python:3.10
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -e
+        source /workspace/env_subs
+        
+        root_dir="dist"
+        
+        pip install --upgrade twine packaging keyring keyrings.google-artifactregistry-auth
+
+        for filename in "$root_dir"/*; do
+          echo "Uploading $filename ..."
+          python3 -m twine upload \
+            --repository-url "https://asia-southeast2-python.pkg.dev/me-data-internal-sandbox/mlops-pipeline-python-library" \
+            "$filename" \
+            --verbose
+        done
+
+options:
+  logging: CLOUD_LOGGING_ONLY
