@@ -1,7 +1,8 @@
 # ----------------------------------------------------
-# 1. Top-Level Substitutions (Fix: Moved to correct level)
+# 1. Top-Level Substitutions (Fix: Defining custom keys)
 # ----------------------------------------------------
 substitutions:
+  # Using the convention of prefixing custom substitutions with an underscore (_)
   _SOURCE_PROJECT_ID: 'bdi-onprem'
   _SOURCE_AR_HOST: 'asia-southeast2-docker.pkg.dev'
   _SOURCE_REPOSITORY: 'custom-prediction-routine-sdk'
@@ -22,7 +23,7 @@ steps:
   - '-c'
   - |
     # Variables are now provided by Cloud Build substitutions.
-    # No internal variable definition or escaping is required.
+    # Note: Reference the substitutions without the underscore (e.g., ${SOURCE_AR_HOST})
 
     # Configure Docker for cross-project access
     gcloud auth configure-docker ${SOURCE_AR_HOST} --quiet
