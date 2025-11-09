@@ -9,7 +9,8 @@ steps:
     - -c
     - |
     set -e
-    python './test-upload-model.py'
+    python 'test-upload-model.py'
 options:
   logging: NONE
+
 
