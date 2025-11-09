@@ -1,11 +1,11 @@
 steps:
 # Step: Run Python Script using Bash
-- id: "run-python-command"
+- id: "install-dependencies"
   name: 'python'
   entrypoint: pip
   args:['install', 'google-cloud-aiplatform', 'google-cloud-storage']
   
-- id: "run-python-command"
+  - id: "run-python-command"
   name: 'python'
   entrypoint: bash
   args:
@@ -15,3 +15,4 @@ steps:
       python ./test-upload-model.py
 options:
   logging: CLOUD_LOGGING_ONLY
+
