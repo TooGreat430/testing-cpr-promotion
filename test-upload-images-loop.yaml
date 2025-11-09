@@ -6,8 +6,7 @@ steps:
   args:
   - '-c'
   - |
-    # Define shell variables internally using the top-level substitutions ($_, $SUBSTITUTION).
-    # This bypasses the parser issue found in the 'env' block.
+    # Define shell variables internally and ESCAPE the $ to prevent Cloud Build substitution.
     SOURCE_PROJECT_ID="bdi-onprem"
     SOURCE_AR_HOST="asia-southeast2-docker.pkg.dev"
     SOURCE_REPOSITORY="custom-prediction-routine-sdk"
@@ -45,30 +44,27 @@ steps:
     # Loop through each image and copy it
     while IFS= read -r FULL_IMAGE_NAME
     do
-      if [ -z "$FULL_IMAGE_NAME" ]; then continue; fi
+      if [ -z "\$FULL_IMAGE_NAME" ]; then continue; fi # <-- ESCAPED
 
       # Full path of the source image
-      SOURCE_IMAGE_TAG="${SOURCE_REGISTRY_PATH}/${FULL_IMAGE_NAME}"
+      SOURCE_IMAGE_TAG="\${SOURCE_REGISTRY_PATH}/\${FULL_IMAGE_NAME}" # <-- ESCAPED
 
       # Use the same image/tag name for the destination
-      DEST_IMAGE_TAG="${DEST_REGISTRY_PATH}/${FULL_IMAGE_NAME}"
+      DEST_IMAGE_TAG="\${DEST_REGISTRY_PATH}/\${FULL_IMAGE_NAME}" # <-- ESCAPED
 
-      echo "Pulling ${SOURCE_IMAGE_TAG}"
-      docker pull "${SOURCE_IMAGE_TAG}"
+      echo "Pulling \${SOURCE_IMAGE_TAG}" # <-- ESCAPED
+      docker pull "\${SOURCE_IMAGE_TAG}" # <-- ESCAPED
 
-      echo "Tagging ${FULL_IMAGE_NAME} for destination project"
-      docker tag "${SOURCE_IMAGE_TAG}" "${DEST_IMAGE_TAG}"
+      echo "Tagging \${FULL_IMAGE_NAME} for destination project" # <-- ESCAPED
+      docker tag "\${SOURCE_IMAGE_TAG}" "\${DEST_IMAGE_TAG}" # <-- ESCAPED
 
-      echo "Pushing ${DEST_IMAGE_TAG}"
-      docker push "${DEST_IMAGE_TAG}"
+      echo "Pushing \${DEST_IMAGE_TAG}" # <-- ESCAPED
+      docker push "\${DEST_IMAGE_TAG}" # <-- ESCAPED
 
-      echo "Completed push of ${DEST_IMAGE_TAG}"
+      echo "Completed push of \${DEST_IMAGE_TAG}" # <-- ESCAPED
     done < /workspace/images_to_copy.txt
   env:
-    # Only assign non-substitution environment variables here.
-  - 'HOME=/root'
+    - 'HOME=/root'
 
 options:
-  # Required when running with a custom Service Account
   logging: CLOUD_LOGGING_ONLY
-
