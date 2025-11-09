@@ -21,8 +21,17 @@ steps:
   args:
   - '-c'
   - |
+    # Define shell variables internally using the top-level substitutions ($_, $SUBSTITUTION).
+    # This bypasses the parser issue found in the 'env' block.
+    SOURCE_PROJECT_ID=$_SOURCE_PROJECT_ID
+    SOURCE_AR_HOST=$_SOURCE_AR_HOST
+    SOURCE_REPOSITORY=$_SOURCE_REPOSITORY
+    DEST_PROJECT_ID=$_DEST_PROJECT_ID
+    DEST_AR_HOST=$_DEST_AR_HOST
+    DEST_REPOSITORY=$_DEST_REPOSITORY
+    IMAGE_PREFIX=$_IMAGE_PREFIX
+
     # Configure Docker for cross-project access
-    # Use standard environment variables (defined in 'env' block below)
     gcloud auth configure-docker ${SOURCE_AR_HOST} --quiet
     gcloud auth configure-docker ${DEST_AR_HOST} --quiet
 
@@ -71,16 +80,8 @@ steps:
       echo "Completed push of ${DEST_IMAGE_TAG}"
     done < /workspace/images_to_copy.txt
   env:
-    # Map the Cloud Build substitution variables (prefixed with _) 
-    # to standard environment variables for the shell script to use.
+    # Only assign non-substitution environment variables here.
   - 'HOME=/root'
-  - 'SOURCE_PROJECT_ID=$_SOURCE_PROJECT_ID'
-  - 'SOURCE_AR_HOST=$_SOURCE_AR_HOST'
-  - 'SOURCE_REPOSITORY=$_SOURCE_REPOSITORY'
-  - 'DEST_PROJECT_ID=$_DEST_PROJECT_ID'
-  - 'DEST_AR_HOST=$_DEST_AR_HOST'
-  - 'DEST_REPOSITORY=$_DEST_REPOSITORY'
-  - 'IMAGE_PREFIX=$_IMAGE_PREFIX'
 
 options:
   # Required when running with a custom Service Account
