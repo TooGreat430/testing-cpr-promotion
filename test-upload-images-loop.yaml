@@ -1,18 +1,3 @@
-# Define variables as custom substitutions. They MUST be prefixed with an underscore (_).
-substitutions:
-  # Source project details
-  _SOURCE_PROJECT_ID: 'bdi-onprem'
-  _SOURCE_AR_HOST: 'asia-southeast2-docker.pkg.dev'
-  _SOURCE_REPOSITORY: 'custom-prediction-routine-sdk'
-  
-  # Destination project details
-  _DEST_PROJECT_ID: 'me-data-internal-sandbox'
-  _DEST_AR_HOST: 'asia-southeast2-docker.pkg.dev'
-  _DEST_REPOSITORY: 'custom-prediction-routine-sdk'
-  
-  # Image filtering
-  _IMAGE_PREFIX: 'image_docker'
-
 steps:
 # 1. Pull and Push Images with a Filter
 - name: 'gcr.io/cloud-builders/gcloud'
@@ -23,13 +8,13 @@ steps:
   - |
     # Define shell variables internally using the top-level substitutions ($_, $SUBSTITUTION).
     # This bypasses the parser issue found in the 'env' block.
-    SOURCE_PROJECT_ID=$_SOURCE_PROJECT_ID
-    SOURCE_AR_HOST=$_SOURCE_AR_HOST
-    SOURCE_REPOSITORY=$_SOURCE_REPOSITORY
-    DEST_PROJECT_ID=$_DEST_PROJECT_ID
-    DEST_AR_HOST=$_DEST_AR_HOST
-    DEST_REPOSITORY=$_DEST_REPOSITORY
-    IMAGE_PREFIX=$_IMAGE_PREFIX
+    SOURCE_PROJECT_ID="bdi-onprem"
+    SOURCE_AR_HOST="asia-southeast2-docker.pkg.dev"
+    SOURCE_REPOSITORY="custom-prediction-routine-sdk"
+    DEST_PROJECT_ID="me-data-internal-sandbox"
+    DEST_AR_HOST="asia-southeast2-docker.pkg.dev"
+    DEST_REPOSITORY="custom-prediction-routine-sdk"
+    IMAGE_PREFIX="image_docker"
 
     # Configure Docker for cross-project access
     gcloud auth configure-docker ${SOURCE_AR_HOST} --quiet
@@ -86,3 +71,4 @@ steps:
 options:
   # Required when running with a custom Service Account
   logging: CLOUD_LOGGING_ONLY
+
