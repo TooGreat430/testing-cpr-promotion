@@ -12,4 +12,5 @@ steps:
       set -e
       python ./test-upload-model.py
 options:
-  logging: NONE
+  logging: CLOUD_LOGGING_ONLY
+
