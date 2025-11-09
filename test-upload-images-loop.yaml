@@ -1,5 +1,5 @@
 steps:
-# 1. Substitute variables with image details. Replace AR_REGION and AR_REPO.
+# 1. Substitute variables with image details.
 - name: 'gcr.io/cloud-builders/gcloud'
   id: Set_Variables
   entrypoint: 'bash'
@@ -8,13 +8,13 @@ steps:
   - |
     # Source project info (where images are pulled from)
     export SOURCE_PROJECT_ID='bdi-onprem'
-    export SOURCE_AR_HOST='asia-southeast2-docker.pkg.dev' # e.g., us-central1-docker.pkg.dev
-    export SOURCE_REPOSITORY='custom-prediction-routine-sdk' # The repo name in the source project
+    export SOURCE_AR_HOST='asia-southeast2-docker.pkg.dev'
+    export SOURCE_REPOSITORY='custom-prediction-routine-sdk'
 
     # Destination project info (where images are pushed to)
     export DEST_PROJECT_ID='me-data-internal-sandbox'
-    export DEST_AR_HOST='asia-southeast2-docker.pkg.dev' # Must be the host for the destination AR
-    export DEST_REPOSITORY='custom-prediction-routine-sdk' # The repo name in the destination project
+    export DEST_AR_HOST='asia-southeast2-docker.pkg.dev'
+    export DEST_REPOSITORY='custom-prediction-routine-sdk'
 
     # The prefix to filter images
     export IMAGE_PREFIX='image_docker'
@@ -28,7 +28,7 @@ steps:
     echo "DEST_REPOSITORY=$DEST_REPOSITORY" >> /workspace/vars.env
     echo "IMAGE_PREFIX=$IMAGE_PREFIX" >> /workspace/vars.env
   env:
-  - 'HOME=/root'
+  - 'HOME=/root' # Ensures the Cloud Builder environment is set up correctly for Docker
 
 # 2. Pull and Push Images with a Filter
 - name: 'gcr.io/cloud-builders/gcloud'
@@ -40,9 +40,9 @@ steps:
     # Load variables set in the previous step
     source /workspace/vars.env
 
-    # Configure Docker for cross-project access (using Cloud Build's service account)
-    # The Cloud Build service account will need Artifact Registry Reader in SOURCE_PROJECT_ID
-    # and Artifact Registry Writer in DEST_PROJECT_ID.
+    # Configure Docker for cross-project access
+    # IMPORTANT: The Cloud Build service account needs Artifact Registry Reader in the source project
+    # and Artifact Registry Writer in the destination project.
     gcloud auth configure-docker ${SOURCE_AR_HOST} --quiet
     gcloud auth configure-docker ${DEST_AR_HOST} --quiet
 
@@ -91,9 +91,6 @@ steps:
       echo "Completed push of ${DEST_IMAGE_TAG}"
     done < /workspace/images_to_copy.txt
   env:
-
   - 'HOME=/root'
   options:
-  logging: CLOUD_LOGGING_ONLY
-
-
+    logging: CLOUD_LOGGING_ONLY
