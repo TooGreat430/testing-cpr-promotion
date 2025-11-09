@@ -1,4 +1,23 @@
 steps:
+  # Step 1: Download Python Libraries
+  - id: download-py-libs-from-internet
+    name: python:3.10
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -e
+        
+        root_dir="dist"
+        mkdir -p "$root_dir"
+
+        while IFS= read -r library_name || [ -n "$library_name" ]; do
+          [ -z "$library_name" ] && continue
+          echo "Downloading $library_name..."
+          pip download "$library_name" -d "$root_dir"
+        done < list_library.txt
+
+  # Step 2: Upload Python Libraries to Artifact Registry
   - id: upload-py-libs
     name: python
     entrypoint: bash
@@ -9,7 +28,7 @@ steps:
         
         root_dir="dist"
         
-        pip install --upgrade twine packaging keyring keyrings.google-artifactregistry-auth
+        pip install --upgrade twine packaging pkginfo keyring keyrings.google-artifactregistry-auth
 
         for filename in "$root_dir"/*; do
           echo "Uploading $filename ..."
