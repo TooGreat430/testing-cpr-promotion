@@ -92,5 +92,3 @@ steps:
     done < /workspace/images_to_copy.txt
   env:
   - 'HOME=/root'
-  options:
-    logging: CLOUD_LOGGING_ONLY
