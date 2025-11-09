@@ -7,8 +7,9 @@ steps:
     - |
     set -e
 
-    python ./upload-model.py
+    python upload-model.py
 options:
   logging: NONE
+
 
 
