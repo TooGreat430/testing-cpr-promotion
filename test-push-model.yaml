@@ -1,16 +1,15 @@
 steps:
-# The python:3.9 image has 'python' as its default entrypoint.
-# We set entrypoint to 'python' explicitly, so the first argument in 'args'
-# is treated as the script name.
+# Step: Run Python Script using Bash
 - id: "run-python-command"
-  name: 'bash'
-  entrypoint: python
+  # Using the python:3.9 builder
+  name: 'python:3.9'
+  # Explicitly use bash to run multiple shell commands
+  entrypoint: bash
   args:
     - -c
+    # The commands following the '|' must be indented
     - |
-    set -e
-    python 'test-upload-model.py'
+      set -e
+      python ./test-upload-model.py
 options:
   logging: NONE
-
-
