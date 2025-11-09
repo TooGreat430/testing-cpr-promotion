@@ -1,0 +1,46 @@
+steps:
+# Step 1: Upload model to Vertex AI (Requires Python with aiplatform library)
+- id: upload-model-to-vertex-ai
+  name: 'gcr.io/cloud-builders/python'
+  entrypoint: python3
+  args:
+    - -c
+    - |
+      # Install required library for Vertex AI operations
+      pip install google-cloud-aiplatform
+      
+      from google.cloud import aiplatform
+
+      # Define variables
+      PROJECT_ID = "me-data-internal-sandbox"
+      MODEL_DISPLAY_NAME = "customer-churn"
+      # IMPORTANT: Use the actual PUSHED image URI from Step 1
+      PIPELINE_DEST_IMAGE = "asia-southeast2-docker.pkg.dev/me-data-internal-sandbox/custom-prediction-routine-sdk/test:latest"
+
+      # Initialize AI Platform
+      aiplatform.init(project=PROJECT_ID, location="asia-southeast2")
+      
+      # 1. Find the parent model for versioning
+      models = aiplatform.Model.list(
+          project=PROJECT_ID,
+          order_by="update_time desc",
+          filter=f'display_name="{MODEL_DISPLAY_NAME}"'
+      )
+      parent_model = models[0] if models else None
+      
+      # 2. Upload the model (with image URI)
+      uploaded_model = aiplatform.Model.upload(
+          project=PROJECT_ID,
+          display_name=MODEL_DISPLAY_NAME,
+          serving_container_image_uri=PIPELINE_DEST_IMAGE,
+          # Need to specify artifact_uri even if not used for prediction server
+          artifact_uri='gs://abc-bkt', # Must be a GCS path
+          parent_model=parent_model.resource_name if parent_model else None,
+          is_default_version=True,
+          labels={
+              "version": "cloud-build-latest" # Placeholder, source_model_version is undefined
+          },
+          sync=True
+      )
+options:
+  logging: CLOUD_LOGGING_ONLY
