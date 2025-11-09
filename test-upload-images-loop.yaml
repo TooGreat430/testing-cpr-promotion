@@ -6,7 +6,7 @@ steps:
   args:
   - '-c'
   - |
-    # Define shell variables internally and ESCAPE the $ to prevent Cloud Build substitution.
+    # Define shell variables internally. No escaping needed here.
     SOURCE_PROJECT_ID="bdi-onprem"
     SOURCE_AR_HOST="asia-southeast2-docker.pkg.dev"
     SOURCE_REPOSITORY="custom-prediction-routine-sdk"
@@ -15,26 +15,26 @@ steps:
     DEST_REPOSITORY="custom-prediction-routine-sdk"
     IMAGE_PREFIX="image_docker"
 
-    # Configure Docker for cross-project access
-    gcloud auth configure-docker ${SOURCE_AR_HOST} --quiet
-    gcloud auth configure-docker ${DEST_AR_HOST} --quiet
+    # Configure Docker for cross-project access (Internal variables must be ESCAPED here)
+    gcloud auth configure-docker \${SOURCE_AR_HOST} --quiet
+    gcloud auth configure-docker \${DEST_AR_HOST} --quiet
 
-    # Base URL for listing images in the source project
-    SOURCE_REGISTRY_PATH=${SOURCE_AR_HOST}/${SOURCE_PROJECT_ID}/${SOURCE_REPOSITORY}
-    DEST_REGISTRY_PATH=${DEST_AR_HOST}/${DEST_PROJECT_ID}/${DEST_REPOSITORY}
+    # Base URL for listing images in the source project (Internal variables must be ESCAPED here)
+    SOURCE_REGISTRY_PATH=\${SOURCE_AR_HOST}/\${SOURCE_PROJECT_ID}/\${SOURCE_REPOSITORY}
+    DEST_REGISTRY_PATH=\${DEST_AR_HOST}/\${DEST_PROJECT_ID}/\${DEST_REPOSITORY}
 
-    echo "Listing images in source: ${SOURCE_REGISTRY_PATH}"
+    echo "Listing images in source: \${SOURCE_REGISTRY_PATH}"
 
     # List images, filter by prefix, and extract the full image name
-    gcloud artifacts docker images list ${SOURCE_REGISTRY_PATH} \
+    gcloud artifacts docker images list \${SOURCE_REGISTRY_PATH} \
       --include-tags \
       --format='value(format("{0}:{1}", PACKAGE, TAG))' \
-      --filter="PACKAGE~^${IMAGE_PREFIX}" \
+      --filter="PACKAGE~^\${IMAGE_PREFIX}" \
       --limit=9999 \
       > /workspace/images_to_copy.txt
 
     if [ ! -s /workspace/images_to_copy.txt ]; then
-        echo "No images found with prefix ${IMAGE_PREFIX}. Exiting."
+        echo "No images found with prefix \${IMAGE_PREFIX}. Exiting."
         exit 0
     fi
 
@@ -44,24 +44,24 @@ steps:
     # Loop through each image and copy it
     while IFS= read -r FULL_IMAGE_NAME
     do
-      if [ -z "\$FULL_IMAGE_NAME" ]; then continue; fi # <-- ESCAPED
+      if [ -z "\$FULL_IMAGE_NAME" ]; then continue; fi
 
-      # Full path of the source image
-      SOURCE_IMAGE_TAG="\${SOURCE_REGISTRY_PATH}/\${FULL_IMAGE_NAME}" # <-- ESCAPED
+      # Full path of the source image (Internal variables must be ESCAPED here)
+      SOURCE_IMAGE_TAG="\${SOURCE_REGISTRY_PATH}/\${FULL_IMAGE_NAME}"
 
-      # Use the same image/tag name for the destination
-      DEST_IMAGE_TAG="\${DEST_REGISTRY_PATH}/\${FULL_IMAGE_NAME}" # <-- ESCAPED
+      # Use the same image/tag name for the destination (Internal variables must be ESCAPED here)
+      DEST_IMAGE_TAG="\${DEST_REGISTRY_PATH}/\${FULL_IMAGE_NAME}"
 
-      echo "Pulling \${SOURCE_IMAGE_TAG}" # <-- ESCAPED
-      docker pull "\${SOURCE_IMAGE_TAG}" # <-- ESCAPED
+      echo "Pulling \${SOURCE_IMAGE_TAG}"
+      docker pull "\${SOURCE_IMAGE_TAG}"
 
-      echo "Tagging \${FULL_IMAGE_NAME} for destination project" # <-- ESCAPED
-      docker tag "\${SOURCE_IMAGE_TAG}" "\${DEST_IMAGE_TAG}" # <-- ESCAPED
+      echo "Tagging \${FULL_IMAGE_NAME} for destination project"
+      docker tag "\${SOURCE_IMAGE_TAG}" "\${DEST_IMAGE_TAG}"
 
-      echo "Pushing \${DEST_IMAGE_TAG}" # <-- ESCAPED
-      docker push "\${DEST_IMAGE_TAG}" # <-- ESCAPED
+      echo "Pushing \${DEST_IMAGE_TAG}"
+      docker push "\${DEST_IMAGE_TAG}"
 
-      echo "Completed push of \${DEST_IMAGE_TAG}" # <-- ESCAPED
+      echo "Completed push of \${DEST_IMAGE_TAG}"
     done < /workspace/images_to_copy.txt
   env:
     - 'HOME=/root'
