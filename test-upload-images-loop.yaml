@@ -22,13 +22,13 @@ steps:
   - '-c'
   - |
     # Configure Docker for cross-project access
-    # Variables are accessed directly using the $ prefix (e.g., $_SOURCE_AR_HOST)
-    gcloud auth configure-docker $_SOURCE_AR_HOST --quiet
-    gcloud auth configure-docker $_DEST_AR_HOST --quiet
+    # Use standard environment variables (defined in 'env' block below)
+    gcloud auth configure-docker ${SOURCE_AR_HOST} --quiet
+    gcloud auth configure-docker ${DEST_AR_HOST} --quiet
 
     # Base URL for listing images in the source project
-    SOURCE_REGISTRY_PATH=$_SOURCE_AR_HOST/$_SOURCE_PROJECT_ID/$_SOURCE_REPOSITORY
-    DEST_REGISTRY_PATH=$_DEST_AR_HOST/$_DEST_PROJECT_ID/$_DEST_REPOSITORY
+    SOURCE_REGISTRY_PATH=${SOURCE_AR_HOST}/${SOURCE_PROJECT_ID}/${SOURCE_REPOSITORY}
+    DEST_REGISTRY_PATH=${DEST_AR_HOST}/${DEST_PROJECT_ID}/${DEST_REPOSITORY}
 
     echo "Listing images in source: ${SOURCE_REGISTRY_PATH}"
 
@@ -36,12 +36,12 @@ steps:
     gcloud artifacts docker images list ${SOURCE_REGISTRY_PATH} \
       --include-tags \
       --format='value(format("{0}:{1}", PACKAGE, TAG))' \
-      --filter="PACKAGE~^$_IMAGE_PREFIX" \
+      --filter="PACKAGE~^${IMAGE_PREFIX}" \
       --limit=9999 \
       > /workspace/images_to_copy.txt
 
     if [ ! -s /workspace/images_to_copy.txt ]; then
-        echo "No images found with prefix $_IMAGE_PREFIX. Exiting."
+        echo "No images found with prefix ${IMAGE_PREFIX}. Exiting."
         exit 0
     fi
 
@@ -71,7 +71,16 @@ steps:
       echo "Completed push of ${DEST_IMAGE_TAG}"
     done < /workspace/images_to_copy.txt
   env:
+    # Map the Cloud Build substitution variables (prefixed with _) 
+    # to standard environment variables for the shell script to use.
   - 'HOME=/root'
+  - 'SOURCE_PROJECT_ID=$_SOURCE_PROJECT_ID'
+  - 'SOURCE_AR_HOST=$_SOURCE_AR_HOST'
+  - 'SOURCE_REPOSITORY=$_SOURCE_REPOSITORY'
+  - 'DEST_PROJECT_ID=$_DEST_PROJECT_ID'
+  - 'DEST_AR_HOST=$_DEST_AR_HOST'
+  - 'DEST_REPOSITORY=$_DEST_REPOSITORY'
+  - 'IMAGE_PREFIX=$_IMAGE_PREFIX'
 
 options:
   # Required when running with a custom Service Account
