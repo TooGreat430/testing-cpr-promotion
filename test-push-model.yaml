@@ -1,7 +1,7 @@
 steps:
 # Step 1: Upload model to Vertex AI (Requires Python with aiplatform library)
 - id: upload-model-to-vertex-ai
-  name: 'gcr.io/cloud-builders/python'
+  name: 'gcr.io/cloud-builders/python:3.11'
   entrypoint: python3
   args:
     - -c
@@ -43,4 +43,5 @@ steps:
           sync=True
       )
 options:
+
   logging: CLOUD_LOGGING_ONLY
