@@ -2,7 +2,7 @@ steps:
 # Step 1: Install dependencies
 - id: "install-dependencies"
   # Use a standard Python 3 image that includes pip
-  name: 'python:3.11' 
+  name: 'python:3-slim' 
   entrypoint: pip
   args:
     - install
@@ -12,10 +12,11 @@ steps:
 # Step 2: Run Python Script using Python interpreter
 - id: "run-python-script"
   # Use the same Python image to ensure a consistent environment
-  name: 'python:3.11' 
+  name: 'python:3-slim' 
   entrypoint: python
   args:
     - ./test-upload-model.py
 
 options:
   logging: CLOUD_LOGGING_ONLY
+
