@@ -90,6 +90,10 @@ steps:
 
       echo "Completed push of ${DEST_IMAGE_TAG}"
 
+options:
+  logging: CLOUD_LOGGING_ONLY
+
     done < /workspace/images_to_copy.txt
   env:
+
   - 'HOME=/root'
