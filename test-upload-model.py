@@ -2,6 +2,11 @@ from google.cloud import aiplatform, storage
 import json
 import sys
 
+aiplatform.init(
+    project='me-data-internal-sandbox',
+    location='asia-southeast2' 
+)
+
 models = aiplatform.Model.list(
     project="me-data-internal-sandbox", 
     order_by="update_time desc",
@@ -29,4 +34,5 @@ uploaded_model = aiplatform.Model.upload(
     sync=True
 
 ) 
+
 
