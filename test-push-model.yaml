@@ -1,18 +1,21 @@
 steps:
-# Step: Run Python Script using Bash
+# Step 1: Install dependencies
 - id: "install-dependencies"
-  name: 'python'
+  # Use a standard Python 3 image that includes pip
+  name: 'python:3.11' 
   entrypoint: pip
-  args:['install', 'google-cloud-aiplatform', 'google-cloud-storage']
-  
-  - id: "run-python-command"
-  name: 'python'
-  entrypoint: bash
   args:
-    - -c
-    - |
-      set -e
-      python ./test-upload-model.py
+    - install
+    - google-cloud-aiplatform
+    - google-cloud-storage
+  
+# Step 2: Run Python Script using Python interpreter
+- id: "run-python-script"
+  # Use the same Python image to ensure a consistent environment
+  name: 'python:3.11' 
+  entrypoint: python
+  args:
+    - ./test-upload-model.py
+
 options:
   logging: CLOUD_LOGGING_ONLY
-
