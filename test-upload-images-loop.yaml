@@ -6,13 +6,13 @@
     - |
       set -e
 
-      list_parent_model="image_docker_1 image_docker_2 image_docker_3"
-      
+      list_parent_model=[image_docker_1, image_docker_2, image_docker_3]
+
       for parent_model_name in $list_parent_model; do
         # Corrected: Use $parent_model_name for substitution, not {}
         PIPELINE_SRC_IMAGE="asia-southeast2-docker.pkg.dev/bdi-onprem/custom-prediction-routine-sdk/$parent_model_name"
-        PIPELINE_DEST_IMAGE="asia-southeast2-docker.pkg.dev/me-data-internal-sandbox/custom-prediction-routine-sdk/$parent_model_name"
-        
+        PIPELINE_DEST_IMAGE="asia-southeast2-docker.pkg.dev/me-data-internal-sandbox/custom-prediction-routine-sdk/$parent_model_name"     
+
         docker pull "$PIPELINE_SRC_IMAGE"
         docker tag "$PIPELINE_SRC_IMAGE" "$PIPELINE_DEST_IMAGE"
         docker push "$PIPELINE_DEST_IMAGE"
