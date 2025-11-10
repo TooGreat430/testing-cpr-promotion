@@ -13,13 +13,12 @@ steps:
         PIPELINE_SRC_IMAGE="asia-southeast2-docker.pkg.dev/bdi-onprem/custom-prediction-routine-sdk/$parent_model_name"
         PIPELINE_DEST_IMAGE="asia-southeast2-docker.pkg.dev/me-data-internal-sandbox/custom-prediction-routine-sdk/$parent_model_name"     
 
-        docker pull "$PIPELINE_SRC_IMAGE"
-        docker tag "$PIPELINE_SRC_IMAGE" "$PIPELINE_DEST_IMAGE"
-        docker push "$PIPELINE_DEST_IMAGE"
+        docker pull "$$PIPELINE_SRC_IMAGE"
+        docker tag "$$PIPELINE_SRC_IMAGE" "$$PIPELINE_DEST_IMAGE"
+        docker push "$$PIPELINE_DEST_IMAGE"
       done
 # If the options block was part of the original step, 
 # move it to the root level (aligned with 'steps:')
 
 options: 
    logging: CLOUD_LOGGING_ONLY
-
