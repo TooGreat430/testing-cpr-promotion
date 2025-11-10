@@ -1,83 +1,21 @@
-# ----------------------------------------------------
-# 1. Top-Level Substitutions (Fix: Defining custom keys)
-# ----------------------------------------------------
-substitutions:
-  # Using the convention of prefixing custom substitutions with an underscore (_)
-  _SOURCE_PROJECT_ID: 'bdi-onprem'
-  _SOURCE_AR_HOST: 'asia-southeast2-docker.pkg.dev'
-  _SOURCE_REPOSITORY: 'custom-prediction-routine-sdk'
-  _DEST_PROJECT_ID: 'me-data-internal-sandbox'
-  _DEST_AR_HOST: 'asia-southeast2-docker.pkg.dev'
-  _DEST_REPOSITORY: 'custom-prediction-routine-sdk'
-  _IMAGE_PREFIX: 'image_docker'
-
-# ----------------------------------------------------
-# 2. Build Steps
-# ----------------------------------------------------
-steps:
-# 1. Pull and Push Images with a Filter
-- name: 'gcr.io/cloud-builders/gcloud'
-  id: Copy_Images
-  entrypoint: 'bash'
+- id: copy-docker-image-source-project
+  name: gcr.io/cloud-builders/docker
+  entrypoint: bash
   args:
-  - '-c'
-  - |
-    # Variables are now provided by Cloud Build substitutions.
-    # Note: Reference the substitutions without the underscore (e.g., ${SOURCE_AR_HOST})
+    - -c
+    - |
+      set -e
 
-    # Configure Docker for cross-project access
-    gcloud auth configure-docker ${SOURCE_AR_HOST} --quiet
-    gcloud auth configure-docker ${DEST_AR_HOST} --quiet
-
-    # Base URL for listing images in the source project
-    SOURCE_REGISTRY_PATH=${SOURCE_AR_HOST}/${SOURCE_PROJECT_ID}/${SOURCE_REPOSITORY}
-    DEST_REGISTRY_PATH=${DEST_AR_HOST}/${DEST_PROJECT_ID}/${DEST_REPOSITORY}
-
-    echo "Listing images in source: ${SOURCE_REGISTRY_PATH}"
-
-    # List images, filter by prefix, and extract the full image name
-    gcloud artifacts docker images list ${SOURCE_REGISTRY_PATH} \
-      --include-tags \
-      --format='value(format("{0}:{1}", PACKAGE, TAG))' \
-      --filter="PACKAGE~^${IMAGE_PREFIX}" \
-      --limit=9999 \
-      > /workspace/images_to_copy.txt
-
-    if [ ! -s /workspace/images_to_copy.txt ]; then
-        echo "No images found with prefix ${IMAGE_PREFIX}. Exiting."
-        exit 0
-    fi
-
-    echo "Found images to copy:"
-    cat /workspace/images_to_copy.txt
-
-    # Loop through each image and copy it
-    while IFS= read -r FULL_IMAGE_NAME
-    do
-      if [ -z "$FULL_IMAGE_NAME" ]; then continue; fi
-
-      # Full path of the source image
-      SOURCE_IMAGE_TAG="${SOURCE_REGISTRY_PATH}/${FULL_IMAGE_NAME}"
-
-      # Use the same image/tag name for the destination
-      DEST_IMAGE_TAG="${DEST_REGISTRY_PATH}/${FULL_IMAGE_NAME}"
-
-      echo "Pulling ${SOURCE_IMAGE_TAG}"
-      docker pull "${SOURCE_IMAGE_TAG}"
-
-      echo "Tagging ${FULL_IMAGE_NAME} for destination project"
-      docker tag "${SOURCE_IMAGE_TAG}" "${DEST_IMAGE_TAG}"
-
-      echo "Pushing ${DEST_IMAGE_TAG}"
-      docker push "${DEST_IMAGE_TAG}"
-
-      echo "Completed push of ${DEST_IMAGE_TAG}"
-    done < /workspace/images_to_copy.txt
-  env:
-    - 'HOME=/root'
-
-# ----------------------------------------------------
-# 3. Build Options
-# ----------------------------------------------------
+      list_parent_model="image_docker_1 image_docker_2 image_docker_3"
+      
+      for parent_model_name in $list_parent_model; do
+        # Corrected: Use $parent_model_name for substitution, not {}
+        PIPELINE_SRC_IMAGE="asia-southeast2-docker.pkg.dev/bdi-onprem/custom-prediction-routine-sdk/$parent_model_name"
+        PIPELINE_DEST_IMAGE="asia-southeast2-docker.pkg.dev/me-data-internal-sandbox/custom-prediction-routine-sdk/$parent_model_name"
+        
+        docker pull "$PIPELINE_SRC_IMAGE"
+        docker tag "$PIPELINE_SRC_IMAGE" "$PIPELINE_DEST_IMAGE"
+        docker push "$PIPELINE_DEST_IMAGE"
+      done
 options:
   logging: CLOUD_LOGGING_ONLY
