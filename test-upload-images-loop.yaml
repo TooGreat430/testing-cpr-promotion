@@ -20,5 +20,6 @@ steps:
 # If the options block was part of the original step, 
 # move it to the root level (aligned with 'steps:')
 
-# options: 
-#   logging: CLOUD_LOGGING_ONLY
+options: 
+   logging: CLOUD_LOGGING_ONLY
+
